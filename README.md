@@ -1,6 +1,8 @@
-# presento
+# diapo
 
-slidev presentation for backo stricto
+[slidev presentation for backo stricto](https://https://backo-stricto.github.io/diapo)
+
+
 
 
 ## Installation and build
