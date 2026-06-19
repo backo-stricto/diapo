@@ -109,28 +109,8 @@ layout: two-cols-header
 
 ## Purpose
 
+
 ::left::
-### Dev point of vue
-
-<div v-click>
-
-_...We all do Data Management even if we don't want..._
-
-</div>
-<div v-click>
-
-A backoffice, responding to API restfull (or not) routes, with autentication and RBAC, views, sanity check, security check, database management, error management, workflows, integration... and business logic code !
-
-
-
-- A lot of code in the front too
-  - *sanity check*
-  - *security check*
-  - business logic code
-
-</div>
-
-::right::
 
 ### User point of vue
 <div v-click>
@@ -143,11 +123,37 @@ _...just a small app to handle ..._
 
 * Translation :
   * A backoffice (and a frontoffice) 
-  * Some autentication and some rights and access control
+  * Some authentication and some rights and access control
   * A lot of _conditions_ (a field exist only in some cases)
   * Some dependances (computation) beetween fields
   * get some data from another application
   * ... 
+
+</div>
+
+
+::right::
+### Dev point of vue
+
+<div v-click>
+
+_...Building a backoffice as quick as possible..._
+
+</div>
+<div v-click>
+
+* __A backoffice__, responding to API restfull routes, 
+  * authentication and RBAC, 
+  * views, 
+  * sanity check, 
+  * security check, 
+  * database(s) management, 
+  * errors management, 
+  * workflows, 
+  * integration
+  * ... 
+  
+  __business logic code__
 
 </div>
 
@@ -228,8 +234,7 @@ The main part
 ::left::
 
 
-```python
-
+```python {all|2}
 # set the flask application route
 flask = Flask("my_media_library")
 
@@ -254,8 +259,7 @@ def check_user_token() -> None | Response:
 
 ::right::
 
-```python
-
+```python {all|9-15}
 @flask.route("/logout")
 @token_required
 def logout():
@@ -300,7 +304,7 @@ Description of the object structure (fields) in a collection
 
 ::code-group
 
-```python [main] {hide|all|3,11,14,15|5|12,17|21-24|26|all}
+```python [main] {hide|all|1,22,26|1-20|3,11,14,15|5|12,17|21-24|all}
 books_item = Item(
     {
         "title": String(require=True),
@@ -354,10 +358,6 @@ def can_modify_borrow(right_name: str, book: Item) -> bool:
     """
     if current_user.has_role(["ADMIN", "EMPLOYEE"]):
         return True
-
-    if book.borrowed is False:
-        return True
-
     return False
 ```
 
@@ -524,7 +524,7 @@ layout: two-cols-header
 
 <Transform :scale="0.9">
 
-```python {2,7-9,16,21-23}
+```python {2,7-9,16,20-22}
 my_backoffice.add_collection(
     "users",
     Item(
@@ -653,11 +653,11 @@ layout: two-cols-header
 ::left::
 
 
-* ```current_user``` est un objet fourni par backo :
-  * des informations sur l'utilisateur actuellement connecté (```_id```, ```login```, ```roles``` )
-  * methodes :
-    * ```has_role( role: str | list[str] )``` qui dit si l'utilsateur a le role ou pas
-    * ```set( data )``` qui positionne les valeurs
+* ```current_user``` Object provided by _backo_ :
+  * contains datas about the currently connected user (```_id```, ```login```, ```roles``` )
+  * methods :
+    * ```has_role( role: str | list[str] )``` check the role in the list
+    * ```set( data )``` set datas
   
   
 
@@ -767,11 +767,11 @@ layout: two-cols-header
 ---
 
 ## exists=
-Avoir des champs conditionnels, indépendant des droits.
+Ability to have conditional fields, depending on others.
 
 ::left::
 
-```python {all|10-18|17|2-8}
+```python {all|10-18|18|2-8}
 # example
 def check_if_female(value: Any, o: Item) -> bool:
     """
@@ -944,7 +944,7 @@ curl -X GET 'http://localhost/myApp/users/?name.$re=do&$age.$gt=18'
 
 | key | value | default | description |
 | - | - | - | - |
-| <kbd>_view</kbd> | string | "client" | selects the view ([stricto views](https://github.com/bwallrich/stricto?tab=readme-ov-file#views))  |
+| <kbd>_view</kbd> | string | "client" | selects the view ([stricto views](https://github.com/backo-stricto/stricto?tab=readme-ov-file#views))  |
 | <kbd>_page</kbd> | int | - | sets the desired number of items per page in paginated data presentation |
 | <kbd>_skip</kbd> | int | - | skips the n-first items of the result list in paginated data presentation. |
 
@@ -1119,7 +1119,7 @@ zoom: 0.9
 
 ## Selections (aka vues)
 
-Do some filtered tables - selction = array of path + un filter
+Do some _filtered tables_. <kbd>selection</kbd> = `array of path` + `a filter`
 
 * <kbd>can_read</kbd> who can execute the selection ?
 
@@ -1135,8 +1135,8 @@ books.register_selection("borrowed_books", borrowed_book_select)
 ```bash
 curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books' 
   '{"result": [
-     ["666", "docker ipsum", "Wallrich"], 
-     ["1213", "Martine chez Epstein", "Lang"]
+     ["666", "Parler couramment lorem ipsum", "Wallrich"], 
+     ["1213", "Martine chez Epstein", "L..g"]
     ],
     "total": 2, "_skip": 0, "_page": 10}'
 
@@ -1155,7 +1155,7 @@ curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books?tit
 ---
 
 ## Actions (1/2)
-More than just CRUD sur un Item
+More than just CRUD on an Item
 
 <kbd>Action</kbd> = `Callable` + `parameters` + `rights` + `Item`
 
@@ -1347,15 +1347,14 @@ books_connector = DBMongoConnector(
 <v-switch>
 <template #1>
 
-* Actual connectors
+* Available connectors
     <Transform :scale="0.7">
 
     | DBConnector | description |
     | :-- | -- |
-    | LdapDBConnector | Connect to a Ldap |
-    | WebConnector | Connect another Web - API |
-    | SQLLiteConnector | In SQLLite |
-
+    | DBMongoConnector | Connect to a Mongo |
+    | DBYmlConnector | Connect to a Yml file |
+    | DBRestApiConnector | Connect to another Restfull API |
     </Transform>
 
 
@@ -1455,8 +1454,8 @@ The way to get informations of the application for the client
 
 | Method | Route | Description |
 | -- | -- | -- |
-| <kbd>GET</kbd> | /\<my-app-name\>/_meta | vue statique de l'application |
-| <kbd>POST</kbd> | /\<my-app-name\>/\<collection name\>/_meta | vue dynamique pour l'objet concerné |
+| <kbd>GET</kbd> | /\<my-app-name\>/_meta | static description of the structure |
+| <kbd>POST</kbd> | /\<my-app-name\>/\<collection name\>/_meta | dynamic description of the object |
 
 ### Use case
 
@@ -1539,20 +1538,44 @@ curl -X POST 'http://localhost/myApp/users/_meta' -d \
 
 
 ---
+layout: two-cols-header
 ---
 
 ## meta routes (3/3)
 
 Generate [openapi](https://www.openapis.org/) documentation
 
+Will return a full openapi json structure for tools like [swagger](https://swagger.io/).
 
-```bash
+::left::
+
+
+<Transform :scale="0.8">
+
+```bash {zoom: 0.7}
 curl -X GET 'http://localhost/myApp/_openapi'
-# Will return this structure.
+# Will return openapi json structure
 {
-...
-}
+    "openapi": "3.1.0",
+    "info": {
+        "title": "media_library",
+        "description": "media_library backoffice powered by Backo"
+    },
+    "paths": {
+        "/books": {
+            "get": {
+                "summary": "List books",
+                ...
 ```
+</Transform>
+
+::right::
+
+
+![](/images/documento.png)
+
+powered by [documento](https://github.com/backo-stricto/documento)
+
 
 ---
 layout: section
@@ -1567,7 +1590,7 @@ zoom: 0.7
 ---
 ## Files objects (1/2)
 
-Like other [stricto types](https://github.com/bwallrich/stricto?tab=readme-ov-file#basic-types).
+Like other [stricto types](https://github.com/backo-stricto/stricto?tab=readme-ov-file#basic-types).
 
 
 | object | Description |
@@ -1802,15 +1825,12 @@ Some features are in progress
 * Filtering transformation (perf)
 * Implementation of _reduced view_
 * SQL databases, openLDAP __(WIP)__
-* Caching
+* Caching 
 
 ### FileConnector
 
 * different storage for files (S3, mongoDB...)
 
-### openAPI
-
-* 80% done
   
 ### Refs ans RefsList
 
@@ -1821,7 +1841,8 @@ Some features are in progress
 ## Funky features
 
 ### Backo-ception
-The way to use collection (and storage) from another backo server
+The way to use collection (and storage) from another backo server 
+(_done_)
 
 ### ACL everywhere
 * Filtering access to routes
@@ -1847,7 +1868,7 @@ layout: section
 
 ## Codes
 
-[backo](https://github.com/bwallrich/backo) / [stricto](https://github.com/bwallrich/stricto)
+[backo](https://github.com/backo-stricto/backo) / [stricto](https://github.com/backo-stricto/stricto)
 
 
 ## Documentation
@@ -1856,7 +1877,7 @@ layout: section
 
 ## Examples
 
-[examples](https://github.com/bwallrich/backo/tree/main/examples)
+[examples](https://github.com/backo-stricto/backo/tree/main/examples)
 
 <footer>
 

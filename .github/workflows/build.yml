@@ -1,6 +1,10 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
+
+env:
+  BASE_URL: https://backo-stricto.github.io/diapo/
+
 on:
   # Runs on pushes targeting the default branch
   push:
@@ -27,6 +31,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
