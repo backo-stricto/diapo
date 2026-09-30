@@ -24,21 +24,47 @@ layout: cover
 
 Backoffice low code
 
-ORM + API restfull
+__ORM + API restfull__
 
 <footer>
 
-<div class="grid grid-cols-4 gap-4">
+<div class="grid grid-cols-2 gap-4">
   <div>
-  
-![](/images/icon.png)
 
-  </div>
-  <div></div>
-  <div></div>
-  <div>
+
+<div>
+<span>
+
+![SED](/images/icon.png)
+
+</span>
+<span>
+
+
+[https://sed-nge.inria.fr/](https://sed-nge.inria.fr/)
+
+</span>
+</div>
+
+
+<Transform :scale="0.5" origin="bottom left">
 
 ![](/images/inr_logo_rouge.png)
+
+</Transform>
+
+  </div>
+  <div origin="top center">
+
+[https://backo-stricto.github.io/diapo](https://backo-stricto.github.io/diapo)
+
+<Transform :scale="0.5">
+  <div style="filter:invert(80%) saturate(1000%)">
+
+![](/images/qr-code.svg)
+
+</div>
+</Transform>
 
 
   </div>
@@ -84,7 +110,7 @@ layout: two-cols
 
 <div v-click.fade-in>
 
-* __For developpers__, not  _idiot proof_ (A lot of callback/lamdba. You can do what you want, including horrors), no ```limitations```
+* __For developpers__, not  _idiot proof_ (A lot of callback/lambda. You can do what you want, including horrors), no ```limitations```
 * __Work in progress__, but already usable
 * __Full documented__, but "_complex_" (a lot of stuff linked together)
 * __Choices__
@@ -184,6 +210,7 @@ classDiagram
         get_by_id()
         select()
         save()
+        create()
     }
     class Item{
         +String/Int/Dict/List...
@@ -196,6 +223,8 @@ classDiagram
         name
         Item
         DBConnector
+        register_selection()
+        register_action()
         select()
         select_one()
     }
@@ -213,7 +242,6 @@ classDiagram
         name
         +fields
         +filter
-        can_read()
     }
     class current_user{
         _id
@@ -307,7 +335,7 @@ Description of the object structure (fields) in a collection
 ```python [main] {hide|all|1,22,26|1-20|3,11,14,15|5|12,17|21-24|all}
 books_item = Item(
     {
-        "title": String(require=True),
+        "title": String(require=True, default=""),
         "pages": Int(),
         "borrowed": Bool(set=set_borrowed),
         "borrow": Dict(
@@ -315,7 +343,7 @@ books_item = Item(
                 "user": Ref(
                     coll="users",
                     field="$.rent.books",
-                    require=True,
+                    require=True, default="",
                     can_read=can_read_borrow_user,
                 ),
                 "return_date": Datetime(require=True),
@@ -436,7 +464,7 @@ layout: two-cols
 ## References (1/3)
 
 * link between objets (colletions)
-* <span v-mark.red=2>keep the database consistency</span>
+* <span v-mark.circle.red=2>keep the database consistency</span>
 
 <kbd>Ref</kbd> and <kbd>RefsList</kbd>
 
@@ -474,7 +502,7 @@ erDiagram
     Addresses {
         String name
         String address
-        Refs users "link many-to-one to Usres"
+        Refs users "link many-to-one to Users"
     }
 ```
 
@@ -944,9 +972,9 @@ curl -X GET 'http://localhost/myApp/users/?name.$re=do&$age.$gt=18'
 
 | key | value | default | description |
 | - | - | - | - |
-| <kbd>_view</kbd> | string | "client" | selects the view ([stricto views](https://github.com/backo-stricto/stricto?tab=readme-ov-file#views))  |
 | <kbd>_page</kbd> | int | - | sets the desired number of items per page in paginated data presentation |
 | <kbd>_skip</kbd> | int | - | skips the n-first items of the result list in paginated data presentation. |
+| <kbd>_total</kbd> | 1 | - | Want the total of available items |
 
 
 The request returns a HTTP status `200` with that JSON object:
@@ -954,12 +982,17 @@ The request returns a HTTP status `200` with that JSON object:
 ```python
 {
     "result": # list of dict containing objects matched
-    "total": # (int) total number of object matched
-    "_view": # the _view given in the request
     "_skip": # the _skip given in the request
     "_page": # the _page given in the request
 }
 ```
+if <kbd>_total</kbd> is set, <kbd>_page</kbd> and <kbd>_skip</kbd> are ignored and the result is the total of Item matchinf the filter.
+
+```python
+ '{ "total" : 666 }'
+```
+
+
 
 </template>
 <template #3>
@@ -1074,8 +1107,13 @@ user.save()
 
 * Match with equality 
 ```python
+from backo import SFilter, Operator
+
+f = SFilter( "$.surname", Operator.EQ, "Doe" )
+f.check( user ) # -> True
 user.match( { "surname" : "Doe" } ) -> return True
-curl -X GET 'http://localhost/myApp/users/?name=Doe'  
+# equivalent
+curl -X GET 'http://localhost/myApp/users/?name=Doe'
 curl -X GET 'http://localhost/myApp/users/_selections/_all?name=Doe'  
 curl -X POST 'http://localhost/myApp/users/_selections/_all -d {"name": "Doe"}'  
 ```
@@ -1084,20 +1122,11 @@ curl -X POST 'http://localhost/myApp/users/_selections/_all -d {"name": "Doe"}'
 
 <div v-click>
 
-* Match with operators
-```python
-user.match( { "incomes" : { "salary" : ( "$gt", 20000 ) } } ) -> return True
-curl -X GET 'http://localhost/myApp/users/_selections/_all?incomes.salary.$gt=20000'  
-curl -X POST 'http://localhost/myApp/users/_selections/_all -d { "incomes" : { "salary" : ( "$gt" : 20000 )}}'  
-```
-
-</div>
-
-<div v-click>
-
 * Match with $or
 ```python
-user.match( ( "$or", [ ( "surname", "Doe" ), ( "incomes.salary" : ( "$gt", 60000 ) ) ]) ) 
+f = SFilter( None, Operator.OR [ SFilter( "$.surname", Operator.EQ, "Doe" ) , SFilter ( "$.incomes.salary", Operator.GT, 20000) ] )
+f.check( user ) # -> True
+# Equivalent
 curl -X POST 'http://localhost/myApp/users/_selections/_all -d { "$or" : [ ( "$.surname", "Doe" ), ( "$.incomes.salary" : ( "$gt", 60000 ) ) ] }'  
 ```
 
@@ -1114,41 +1143,71 @@ Selections and Actions
 
 
 ---
-zoom: 0.9
+zoom: 0.8
 ---
 
-## Selections (aka vues)
+## Selections (aka vues) 1/2
 
-Do some _filtered tables_. <kbd>selection</kbd> = `array of path` + `a filter`
+Do some _filtered tables_. <kbd>selection</kbd> = `array of path` + `a filter` + `a sort`
 
 * <kbd>can_read</kbd> who can execute the selection ?
 
 ```python
 # list of borrowed books
-borrowed_book_select = Selection( [ "$.title", "$.borrow.user.login" ] , filter={ 'borrowed' : True })
+borrowed_book_select = Selection( [ "$.title", "$.borrow.user.login" ], 
+    filter=SFilter( '$.borrowed', Operator.EQ, True ), # or filter=function()
+    sort=[ "-$.borrow.date", "$.title" ] 
+    )
 books.register_selection("borrowed_books", borrowed_book_select)
-```
-
-* the related *api route*
-
-
-```bash
-curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books' 
-  '{"result": [
-     ["666", "Parler couramment lorem ipsum", "Wallrich"], 
-     ["1213", "Martine chez Epstein", "L..g"]
-    ],
-    "total": 2, "_skip": 0, "_page": 10}'
-
-# Filtering on selections
-curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books?title.$reg=Martine'
 ```
 
 | Method | Route | Description |
 | -- | -- | -- |
 | <kbd>GET</kbd> | \<my-app-name\>/\<collection name\>/_selections/\<selection_name\> | do the selection  |
+| <kbd>GET</kbd> | \<my-app-name\>/\<collection name\>/_selections/\<selection_name\>_total | get the total  |
 | <kbd>POST</kbd> | \<my-app-name\>/\<collection name\>/_selections/\<selection_name\> | do the selection with complex filter  |
+| <kbd>POST</kbd> | \<my-app-name\>/\<collection name\>/_selections/\<selection_name\>_total | get the total for selection with complex filter  |
 
+
+
+---
+zoom: 0.8
+---
+
+## Selections (aka vues) 2/2
+
+Do some _filtered tables_. <kbd>selection</kbd> = `array of path` + `a filter` + `a sort`
+
+* the related *api route*
+
+
+```bash
+curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books?_skip=10&_page=10' 
+  '{"result": [
+     ["666", "Parler couramment lorem ipsum", "Wallrich"], 
+     ["1213", "Martine chez Epstein", "L..g"]
+    ],
+    "_skip": 10, "_page": 10}'
+# Total
+curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books?_total=1'
+'{ "total" : 12 }'
+curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books_total'
+'{ "total" : 12 }'
+```
+
+with filter on the Selection
+
+```bash
+# All borrowed books with title containing "lorem"
+curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books?title.$reg=lorem'
+  '{"result": [
+     ["666", "Parler couramment lorem ipsum", "Wallrich"], 
+    ],
+    "_skip": 0, "_page": 0}'
+# Total
+curl -X GET 'http://localhost/media_library/books/_selections/borrowed_books?title.$reg=lorem&_total=1'
+'{ "total" : 1 }'
+```
 
 
 ---
@@ -1313,7 +1372,7 @@ Database handlers
 layout: two-cols-header
 ---
 
-## DBConnector
+## DBConnector (1/3)
 
 ::left::
 
@@ -1354,6 +1413,8 @@ books_connector = DBMongoConnector(
     | :-- | -- |
     | DBMongoConnector | Connect to a Mongo |
     | DBYmlConnector | Connect to a Yml file |
+    | DBSqlite3Connector | Connect to a Sqlite2 DB |
+    | DBYmlDirConnector | Connect to a list of Yml file |
     | DBRestApiConnector | Connect to another Restfull API |
     </Transform>
 
@@ -1362,7 +1423,7 @@ books_connector = DBMongoConnector(
 * You can write your own
 </template>
 
-<template #3>
+<template #2>
 
 A <kbd>DBConnector</kbd> must implement thoses methods :
 
@@ -1377,6 +1438,7 @@ A <kbd>DBConnector</kbd> must implement thoses methods :
 | <kbd>save()</kbd> | save an existing object |
 | <kbd>select()</kbd> | select objects |
 | <kbd>generate_id()</kbd> | compute an uniq ```_id```  |
+| <kbd>check_structure()</kbd> | check or modify the structure according to the model  |
 
 </Transform>
 
@@ -1385,6 +1447,122 @@ A <kbd>DBConnector</kbd> must implement thoses methods :
 
 
 
+---
+layout: two-cols-header
+zoom: 0.7
+---
+
+## DBConnector (2/3)
+
+### select and filtering
+
+::left::
+
+```mermaid
+sequenceDiagram
+    Flask->>Backo: select -> query(...)
+    Backo->>DBConnector: query -> SFilter(...)
+    DBConnector-->>DBConnector: Transform SFilter -> DBFilter
+    DBConnector->>DB: DBfilter
+    DB->>DBConnector: [ dict ]
+    DBConnector-->>Backo: SResponse( [ dict ] ... )
+    Backo->>Backo: post Filtering
+    Backo->>Flask: [ Item ] ...
+```
+
+::right::
+
+* Transform SFilter into DBFilter
+* Apply <kbd>Transformer(s)</kbd>
+* Return a `SResponse` :
+  * `sorted` is the sort done by the DB ?
+    * _outside_ the scope of the DB (following a `Ref`)
+  * `more_than_filter` is the filter totaly apply ?
+    * Filter not understandable by the DBConnector (Yml file, ...)
+    * Some filter operators not implemented in the DBConnector (list operators like `CONTAINS`, `SIZE` ... )
+    * _outside_ the scope of the DB (following a `Ref`)
+  
+```python
+# $.borrow.user is a Ref to the collection users
+mySQLConnector.select(SFilter( None, Operator.AND, 
+[ SFilter( "$.borrow.user.surname", Operator.EQ, "Bertrand", 
+  SFilter( "$.title", Operator.REG, r"Martine.*" ) 
+]))
+
+```
+Will return a `more_than_filter = True` and only an extraction from the DB with selection on `$.title`. backo will do the post filtering for the `$.borrow.user.surname`
+
+
+
+---
+layout: two-cols-header
+zoom: 0.7
+---
+
+## DBConnector (3/3)
+
+### pragma, structure and Transformers
+
+::left::
+
+#### DB structure alteration
+
+<div v-click>
+
+in some DB (relational), The DB structure must match the _backo model_.
+
+```python
+from backo.db import DBSqlite3Connector
+
+mySQLConnector = DBSqlite3Connector( 'my_db_file.db', "books" )
+# The backo model is given to the DBConnector when you define
+# The DB connector in the collection
+# Check the structure
+is_ok, table_alteration_message = mySQLConnector.check_structure()
+if is_ok is False:
+    print('Hey, you must alter table(s) by doing something like :'
+    print(table_alteration_message)
+
+# Or apply automatically alterations (dangerous)
+mySQLConnector.check_structure(True)
+
+```
+</div>
+
+::right::
+
+#### Transformers
+
+<div v-click>
+
+Transformers a used to :
+* adapt an existing `DBConnector` to an existind DB.
+  * Remove / rename fields
+* transform *types* depending on the DB (ex : the storage of datetime differs)
+
+```python
+from backo.db import RenameTransformer, IgnoreTransformer
+from backo.db import DBSqlite3Connector
+
+mySQLConnector = DBSqlite3Connector( 'my_db_file.db', "books" )
+# Store backo $.extend.summary into the DB "resume" field.
+mySQLConnector.register_transformer(RenameTransformer(["extend", "summary"], ["resume"]))
+# ignore simply "isbn_13" from the DB 
+mySQLConnector.register_transformer(IgnoreTransformer(["isbn_13"]))
+
+```
+
+and all select and sort will be transformed :
+
+```python
+mySQLConnector.select(SFilter( "$.extend.summary", Operator.REG, r"Martine.*" ))
+
+```
+will be transformed in something like 
+
+`SELECT * FROM books WHERE resume GLOB Martine.*`
+
+</div>
 
 ---
 layout: section
@@ -1774,15 +1952,36 @@ zoom: 1
 </v-switch> 
 
 ---
+layout: two-cols-header
 zoom: 0.7
 ---
 # Quickstart
 
+::left::
+
 1. Installation 
    ```bash
-   pip install backo   
+   pip install backo # backo[mongo] for optional packages like mongo.
    ```
-2. `backoffice.py`
+2. Initialisation (if you want)
+```
+   Backo>
+────────────────────────────────────────
+Welcome to backo  
+First you must chose a name for your application.
+Lets go.
+────────────────────────────────────────
+? Name of the application  : nationality
+────────────────────────────────────────
+Now you can create some "collections".
+(A collection is like a sql table)
+It is better to have at least one collection :).
+────────────────────────────────────────
+? Do you want to add a new collection in the collections list (Y/n)
+...
+```
+
+3. `backoffice.py` (by hand)
    ```python
    from flask import Flask
    from collections_set import countries, people
@@ -1801,20 +2000,21 @@ zoom: 0.7
    if __name__ == "__main__":
        flask.run(host="0.0.0.0", port=5000)
    ```
-3. Add _authentication_
+::right::
+
 4. Create _Items_ et _Collections_
    1. `Item`
    2. `Dbconnector`
-5. Rights
-6. Add some `Selection`
-7. Add some `Action`
+5. Add some `Selection`
+6. Add some `Action`
+7. Add _authentication_ and _Rights_
 
 
 ---
 layout: two-cols-header
 ---
 # Work In Progress
-Some features are in progress
+Always some features in progress
 
 ::left::
 
@@ -1822,35 +2022,32 @@ Some features are in progress
 
 ### DBConnectors
 
-* Filtering transformation (perf)
-* Implementation of _reduced view_
-* SQL databases, openLDAP __(WIP)__
-* Caching 
+* projections & sorting improvment
+* optimistic locking
+* SQL databases (postgresSQL, Cassandra, influxDB)
+* named selection (for complex DB filters )
 
 ### FileConnector
 
 * different storage for files (S3, mongoDB...)
 
-  
-### Refs ans RefsList
+### Documentation
 
-* Deal with incoherent datas
+* Never enought doc
 
 ::right::
 
-## Funky features
+## Other features
 
-### Backo-ception
-The way to use collection (and storage) from another backo server 
-(_done_)
-
-### ACL everywhere
-* Filtering access to routes
+* openLDAP DBConnector
+  
 
 ### External modules
 * Authentication
 * Notification
 * ...
+
+### The front
 
 F.R.O.N.T.O
 
