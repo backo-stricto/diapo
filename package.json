@@ -1,5 +1,5 @@
 {
-  "name": "presento",
+  "name": "diapo",
   "version": "1.0.0",
   "description": "slidev presentation for backo stricto",
   "main": "index.js",
@@ -18,8 +18,8 @@
     "url": "https://github.com/backo-stricto/presento/issues"
   },
   "homepage": "https://github.com/backo-stricto/presento#readme",
-  "dependencies": {    
+  "dependencies": {
     "@slidev/cli": "52.15.2",
-    "slidev-theme-dracula": "0.2.0"
+    "slidev-theme-dracula": "^0.2.5"
   }
 }
