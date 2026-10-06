@@ -20,6 +20,6 @@
   "homepage": "https://github.com/backo-stricto/presento#readme",
   "dependencies": {    
     "@slidev/cli": "52.15.2",
-    "slidev-theme-dracula": "^0.2.0"
+    "slidev-theme-dracula": "0.2.0"
   }
 }
