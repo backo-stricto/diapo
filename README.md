@@ -12,7 +12,12 @@ npm install @slidev/cli @slidev/theme-dracula
 
 # To run localy
 
-npx slidev
+npx slidev slides.md
+
+or 
+
+npx slidev short.md
+
 
 # To build
 

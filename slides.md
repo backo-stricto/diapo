@@ -5,7 +5,7 @@ theme: dracula
 # like them? see https://unsplash.comections/94734566/slidev
 # background: https://cover.sli.dev
 # some information about your slides (markdown enabled)
-title: Backo - stricto
+title: Backo
 subtitle: ORM + API restfull
 author: Bertrand Wallrich
 # https://sli.dev/features/drawing
@@ -20,7 +20,7 @@ duration: 35min
 layout: cover
 ---
 
-# Backo - Stricto
+# Backo
 
 Backoffice low code
 
@@ -96,7 +96,6 @@ layout: two-cols
 ::left::
 
 
-<div v-click>
 
 <Transform :scale="0.8" origin="bottom center">
 
@@ -104,24 +103,15 @@ layout: two-cols
 
 </Transform>
 
-</div>
 
 ::right::
 
-<div v-click.fade-in>
-
-* __For developpers__, not  _idiot proof_ (A lot of callback/lambda. You can do what you want, including horrors), no ```limitations```
-* __Work in progress__, but already usable
-* __Full documented__, but "_complex_" (a lot of stuff linked together)
+* __For developpers__, not  _idiot proof_ (A lot of callback/lambda. You can do what you want, including horrors), no __limitations__
+* __Full documented__, but need to be improved (a lot of stuff linked together)
 * __Choices__
   * language = python
   * reduced list of deps : flask, json, API restfull, JWT
   * __MIT Licence__
-* __Performance ?__ (actually not important)
-
-
-</div>
-
 
 
 ---
@@ -129,60 +119,256 @@ layout: section
 ---
 # General
 
+
+---
+layout: two-cols-header
+zoom : 0.7
+---
+
+## Why backo
+
+From a scientific code to a web service
+
+::left::
+
+The starting point
+
+```mermaid
+---
+config:
+  theme: redux-dark-color
+  look: neo
+  layout: ELK
+---
+flowchart LR
+  subgraph Scientific code
+    process[[process]]
+  end
+  input([input]) --> process
+  parameters([parameters]) --> process
+  process --> output([output])
+```
+
+::right::
+
+<div v-click>
+
+The _final_ application
+
+```mermaid
+---
+config:
+  theme: redux-dark-color
+  look: neo
+  layout: ELK
+---
+flowchart LR
+    subgraph application
+      subgraph Scientific code
+        process[[process]]
+      end
+      subgraph SI
+        CRUD[[Manage]]
+        parameters[("parameters
+        input
+        outputs
+        agregates")]
+      end
+    end
+    input([input]) --> CRUD
+    CRUD -- spawn --> process
+    process -- output --> CRUD
+    CRUD <-. CRUD .-> parameters
+    CRUD --> output([output])
+    CRUD -.-> visu([visualisation])
+    CRUD -.-> agregates([agregates])
+```
+
+
+</div>
+
+
+
+
+
 ---
 layout: two-cols-header
 ---
 
-## Purpose
+## Agility
 
+__Howto handle evolutions of needs ?__
 
 ::left::
 
 ### User point of vue
-<div v-click>
 
-_...just a small app to handle ..._
+<div v-click=1>
 
+_...just a small web app to handle ..._
 
 </div>
-<div v-click>
+<div v-click=3>
 
-* Translation :
-  * A backoffice (and a frontoffice) 
-  * Some authentication and some rights and access control
-  * A lot of _conditions_ (a field exist only in some cases)
-  * Some dependances (computation) beetween fields
-  * get some data from another application
-  * ... 
+* just a proof of concept, no need auth !
+
+</div>
+<div v-click=5>
+
+* must interact with this external stuff (openData/model) !
+
+</div>
+<div v-click=7>
+
+* need some stats|summary|agreagation just for us.
+* of course each user can only see its own results
+
+</div>
+
+::right::
+### Dev point of vue
+
+<div v-click=2>
+
+_... as quick as possible..._
+
+</div>
+
+<div v-click=4>
+
+* sanity / security check.
+* database(s) Management,
+* errors management,
+
+</div>
+<div v-click=6>
+
+* integration,
+* migrations,
+
+</div>
+<div v-click=8>
+
+* Authentication and RBAC,
+* views,
+
+</div>
+
+
+
+---
+layout: two-cols-header
+---
+
+## backoffice
+
+
+A backoffice provides a web API (restfull API) for handling datas (CRUD).
+100% of operations can be executed via this api.
+
+::left::
+
+
+```mermaid
+---
+config:
+  look: handDrawn
+  theme: dark
+---
+sequenceDiagram
+    actor client as Web app
+    participant backo as Backoffice
+    participant db@{ "type" : "collections" } as Database    
+    participant process@{ "type" : "collections" } as Process    
+    client ->>backo: http request (GET/POST/UPDATE/DELETE)
+    activate backo
+    backo -->>db: Get / insert / update / delete
+    db -->> backo: Data
+    backo -->>process: spawn
+    process -->>backo: output
+    backo -->>db: Get / insert / update / delete
+    db -->> backo: Data
+    backo->>client  : http response (Datas)
+    deactivate backo
+```
+<div v-click=2>
+
+### Low code
+
+main part of the code already written. 
+
+Less code but not zero code  
 
 </div>
 
 
 ::right::
-### Dev point of vue
 
-<div v-click>
+<div v-click=1>
 
-_...Building a backoffice as quick as possible..._
 
-</div>
-<div v-click>
-
-* __A backoffice__, responding to API restfull routes, 
-  * authentication and RBAC, 
-  * views, 
-  * sanity check, 
-  * security check, 
-  * database(s) management, 
-  * errors management, 
-  * workflows, 
-  * integration
-  * ... 
-  
-  __business logic code__
+* authentication and RBAC, <span v-if="$clicks >= 2">✅ </span> 
+* views, <span v-if="$clicks >= 2">✅ </span> 
+* sanity check, <span v-if="$clicks >= 2">✅ </span> 
+* security check, <span v-if="$clicks >= 2">✅ </span> 
+* database(s) management, <span v-if="$clicks >= 2">✅ </span> 
+* errors management, <span v-if="$clicks >= 2">✅ </span> 
+* workflows, <span v-if="$clicks >= 2">✅ </span> 
+* integration, <span v-if="$clicks >= 2">✅ </span> 
+* <span v-mark.red=2>__business logic code__</span>
 
 </div>
 
+
+
+---
+layout: two-cols-header
+---
+
+## Goals
+
+
+__A backoffice quickly available (in hours or days), entirely functional, adaptable and scalable.__
+
+::left::
+
+* _out of the box_ (can be used quickly)
+* _short learning curve_ 
+  * shortlist of (smart) concepts
+  * full documented
+* _scalable_ 
+  * From small to complex application
+  * Avoid unforse feature (__It is code, YOUR code__)
+
+
+::right::
+
+<iframe
+  src="https://backo.readthedocs.io/en/latest/readme.html#"
+  style="
+      width: 200%;
+      height: 200%;
+      transform: scale(0.5);
+      transform-origin: top left;
+      border: none;
+    "
+  class="w-full h-full"
+></iframe>
+
+
+---
+zoom: 0.7
+---
+
+## Comparative
+
+chatgpt likes backo ;) (oct 2026)
+
+<Transform :scale="0.9">
+
+![](/images/comparative_chatgpt.png)
+
+</Transform>
 
 
 
@@ -190,8 +376,210 @@ _...Building a backoffice as quick as possible..._
 layout: section
 ---
 
+# Key features
+
+
+---
+layout: two-cols-header
+zoom: 0.9
+---
+
+## Classic
+
+::left::
+
+* _Standard_ description of elements :
+  * `Collection` (aka Table in SQL)
+  * `Item` the object in the collection
+  * `Ref`erences cross collections (_Ref_ and _RefsList_)
+  * standard _types_ (Int, String, Float, Bool, List, ...)
+  * custom types (inheritance)
+  * standard attributes (required, default, ...)
+* _Standard_ API 
+  * All routes for CRUD
+  * All routes for select (pagination, complex filtering)
+* _Connector_ to a standard Database or file (MongoDB, Sqlite3, ...)
+
+
+::right::
+
+```python {hide|all}
+# Define the Item
+books_item = Item(
+    {
+        "title": String(require=True, default="No title"),
+        "pages": Int(),
+        "borrow": Dict(
+            {
+                "user": Ref(
+                    coll="users",
+                    field="$.rent.books",
+                ),
+                "return_date": Datetime(),
+                "date": Datetime(),
+            },
+        ),
+    }
+)
+# define the DBHandler
+connector = DBMongoConnector(
+    connection_string="mongodb://...", collection="Books"
+)
+books = Collection("books", books_item, connector)
+myapp = Backoffice("media_library") # my backo
+myapp.register_collection(books)
+myapp.build_routes(flask, "v1") # build API routes
+flask.run(host="0.0.0.0", port=5000) # start the web server
+```
+
+---
+layout: two-cols-header
+---
+
+## Specific
+
+No dedicated language, no configuration file : __100% python__,  Full programatic (you can change _any_ value by a function with return a value)
+
+```python
+"pages" : Int(require=True, default=0),
+"date" : Datetime(require=True, default=lambda o: return datetime.now() )
+```
+::left::
+
+* `Selections` (= views)
+  * filtering, partial views, sorting
+* `Actions` for more complex modifications than CRUD
+* _migration_ tools
+* _init tool_ (backo_init)
+
+::right::
+
+* __rights__ 
+  * on every fields (read / modify) 
+  * on every collection ( CRUD )
+  * on every action ( execute) 
+  * ...
+* __calculated__ fields (like a formula in excel, but a python function) 
+* __conditional__ fields (exists only if ... ) 
+* __events__ on fields
+
+
+---
+---
+
+## Database Handlers
+
+  * Different types of databases (MongoDB, SQL, ...)
+    * Filtering / sorting transformation into the DB language
+  * adapt to existing database with `Transformer`
+  * integration in an existing _SI_
+    * mix different types of `DBHandler` per `Collection` with cross references
+  * Structure coherence policies
+    * keep database coherence
+    * delete item, _external collections_
+  
+
+
+
+---
+---
+
+# Architecture
+
+
+<v-switch>
+<template #1>
+
+## A single application
+
+```mermaid
+---
+config:
+  look: handDrawn
+  theme: dark
+---
+flowchart LR
+    subgraph application
+        flask@{ shape: div-rect, label: "flask" }
+        subgraph backo
+            backoffice@{ shape: div-rect, label: "backoffice" }
+            coll1[collection 1]
+            coll2[collection 2]
+            coll3[collection 3]
+            DBHandler1[ DBHandler ]
+            DBHandler2[ DBHandler ]
+            DBHandler3[ DBHandler ]
+        end
+        DB1[(Database)]
+    end
+    client1[ client ] -. GET\nPOST\nPATCH\nDELETE .-> flask
+    client2[ client ] -. GET\nPOST\nPATCH\nDELETE .-> flask
+    flask <==> backoffice
+    backoffice <==>|"get_by_id()\ncreate()\nselect()\nupdate()"| coll1
+    backoffice <==> coll2
+    backoffice <==> coll3
+    coll1 <==>|"get()\ncreate()\nselect()\nsave()"| DBHandler1
+    DBHandler1 <-->|"SELECT * FROM WHERE"| DB1
+    coll2 <==> DBHandler2
+    DBHandler2 <--> DB1
+    coll3 <==> DBHandler3
+    DBHandler3 <--> DB1
+```
+</template>
+<template #2>
+
+## Integration
+
+```mermaid
+---
+config:
+  look: handDrawn
+  theme: dark
+---
+flowchart LR
+    subgraph application
+        flask@{ shape: div-rect, label: "flask" }
+        subgraph backo
+            backoffice@{ shape: div-rect, label: "backoffice" }
+            coll1[collection 1]
+            coll2[collection 2]
+            coll3[collection 3]
+            DBHandler1[ DBHandler ]
+            DBHandler2[ DBHandler ]
+            DBHandler3( DBRestFull )
+        end
+        DB1[(Database 1)]
+    end
+    client1[ client ] -. GET\nPOST\nPATCH\nDELETE .-> flask
+    client2[ client ] -. GET\nPOST\nPATCH\nDELETE .-> flask
+    flask <==> backoffice
+    backoffice <==>|"get_by_id()\ncreate()\nselect()\nupdate()"| coll1
+    backoffice <==> coll2
+    backoffice <==> coll3
+    coll1 <==>|"get()\ncreate()\nselect()\nsave()"| DBHandler1
+    DBHandler1 <-->|"SELECT * FROM WHERE"| DB1
+    coll2 <==> DBHandler2
+    DBHandler2 <-->|"coll.find().sort()"| DB2[(Database 2)]
+    coll3 <==> DBHandler3
+    DBHandler3 <-..->|GET\nPOST\nPATCH\nDELETE| DB3[external API]
+
+```
+</template>
+
+</v-switch>
+
+---
+layout: section
+---
+
 # How it works
 
+---
+---
+
+## Main objects
+
+<div class="h-full flex items-center justify-center">
 
 ```mermaid {scale: 0.5}
 ---
@@ -200,7 +588,7 @@ config:
   theme: dark
 ---
 classDiagram
-    direction TD
+    direction LR
     Backoffice "0" --> "1+" Collection
     Collection "1" -- "1" Item
     Collection "1" -- "1" DBConnector
@@ -251,6 +639,92 @@ classDiagram
     }
 ```
 
+</div>
+
+
+---
+layout: two-cols-header
+zoom: 0.8
+---
+
+## some python
+
+* _only_ business logic code
+* DB consistency, model checking, rights, re-computation, events, ...  _in background_
+* DB abstraction
+  
+
+::left::
+
+```python
+# Define the Item
+books_item = Item(
+    {
+        "title": String(require=True, default="No title"),
+        "pages": Int(),
+        "borrow": Dict(
+            {
+                "user": Ref(
+                    coll="users",
+                    field="$.rent.books",
+                ),
+                "return_date": Datetime(),
+                "date": Datetime(),
+            },
+        ),
+    }
+)
+# define the DBHandler
+connector = DBMongoConnector(
+    connection_string="mongodb://...", collection="Books"
+)
+books = Collection("books", books_item, connector)
+myapp = Backoffice("media_library") # my backo
+myapp.register_collection(books)
+```
+
+::right::
+* Creation & modify
+```python
+b = myapp.books # Get the books collection
+martine = b.create({ "title", "Martine use docker" })
+# martine._id -> "12345"
+# martine.title -> "Martine use docker"
+martine.pages = "35" # raise an error
+martine.pages = 35
+martine.save()
+```
+* Update a Ref
+```python
+u = myapp.users # Get the users collection
+bert = b.select_one( SFilter( "$.surname", Operator.EQ, "Bertrand" ))
+if bert:
+    bert.rent.books # -> []
+    martine.borrow.user = bert._id
+    martine.borrow.date = datetime.now()
+    martine.borrow.return_date = martine.borrow.date + timedelta(month=1)
+    martine.save()
+    bert.reload() # bert has changed in the DB
+    bert.rent.books # -> [ "12345" ]
+```
+* and more !
+
+
+
+---
+layout: section
+---
+
+# Go deeper ?
+
+<div class="grid grid-cols-2 gap-4">
+<button @click="$nav.next" class="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+  Yes
+</button>
+<button @click="$nav.go($nav.total)" class="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+  No
+</button>
+</div>
 
 ---
 layout: two-cols-header
@@ -297,8 +771,8 @@ def logout():
     return response
 
 myapp = Backoffice("media_library")
-myapp.add_collection(books)
-myapp.add_collection(users)
+myapp.register_collection(books)
+myapp.register_collection(users)
 
 myapp.build_routes(flask, "v1", check_user_token)
 
@@ -512,7 +986,7 @@ erDiagram
 
 
 ```python {hide|all|2,16|3-11,17-24|12,25|7-9,21-23|all}
-my_backoffice.add_collection(
+my_backoffice.register_collection(
     "users",
     Item(
         {
@@ -526,7 +1000,7 @@ my_backoffice.add_collection(
     yml_users
 )
 
-my_backoffice.add_collection(
+my_backoffice.register_collection(
     "addrs",
     Item(
         {
@@ -553,7 +1027,7 @@ layout: two-cols-header
 <Transform :scale="0.9">
 
 ```python {2,7-9,16,20-22}
-my_backoffice.add_collection(
+my_backoffice.register_collection(
     "users",
     Item(
         {
@@ -566,7 +1040,7 @@ my_backoffice.add_collection(
         }),
     yml_users
 )
-my_backoffice.add_collection(
+my_backoffice.register_collection(
     "addrs",
     Item(
         {
@@ -866,8 +1340,8 @@ def logout():
     return response
 
 myapp = Backoffice("media_library")
-myapp.add_collection(books)
-myapp.add_collection(users)
+myapp.register_collection(books)
+myapp.register_collection(users)
 
 myapp.build_routes(flask, "", check_user_token)
 
@@ -1657,7 +2131,7 @@ def can_see_salary(right_name, o):
         return True
     return False
 
-my_backoffice.add_collection(
+my_backoffice.register_collection(
     "users",
     Item(
         {
@@ -1862,7 +2336,7 @@ Evolution of the DB
 
 ---
 layout: two-cols-header
-zoom: 0.9
+zoom: 0.8
 ---
 ## Evolution of the datastructure
 Changing the model with datas already saved.
@@ -1898,7 +2372,7 @@ report = myapp.migrate("books")
 ::right::
 
 ### Test and do Migration
-<kbd>dry_run=False</kbd>
+<kbd>strategy=</kbd>```MigrationStrategy.DRY_RUN``` | ```MigrationStrategy.EXECUTE``` | ```MigrationStrategy.FORCE```
 
 <div v-click>
 
@@ -1910,7 +2384,6 @@ def update_with_note(o: dict) -> dict:
     if "note" not in o:
         o["note"] = 10.0
     return o
-
 
 # Check if OK (dry_run is True by default)
 report = mybackoffice.migrate("books", update_with_note, _id="_id")
@@ -1993,8 +2466,8 @@ It is better to have at least one collection :).
    flask = Flask("nationality")
    
    myapp = Backoffice("nationality")
-   myapp.add_collection(countries)
-   myapp.add_collection(people)
+   myapp.register_collection(countries)
+   myapp.register_collection(people)
    myapp.add_routes(flask, "")
    
    if __name__ == "__main__":
@@ -2063,15 +2536,13 @@ layout: section
 # Learn More
 
 
-## Codes
+## Code
 
-[backo](https://github.com/backo-stricto/backo) / [stricto](https://github.com/backo-stricto/stricto)
-
+[backo](https://github.com/backo-stricto/backo)
 
 ## Documentation
 
-[backo](https://backo.readthedocs.io/) / [stricto](https://stricto.readthedocs.io/)
-
+[backo](https://backo.readthedocs.io/)
 ## Examples
 
 [examples](https://github.com/backo-stricto/backo/tree/main/examples)
@@ -2085,9 +2556,6 @@ layout: section
   <div>
   </div>
   <div>
-  </div>
-  <div >
-    <img  src="/images/stricto.svg" />
   </div>
 </div>
 
