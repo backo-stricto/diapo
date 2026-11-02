@@ -17,57 +17,35 @@ transition: slide-left
 comark: true
 # duration of the presentation
 duration: 35min
-layout: cover
+layout: section
 ---
 
 # Backo
 
 Backoffice low code
 
-__ORM + API restfull__
+__ORM + REST API + Storage abstraction + Custom code + RBAC/RLAC__
+
+[https://github.com/backo-stricto/backo](https://github.com/backo-stricto/backo)
 
 <footer>
 
-<div class="grid grid-cols-2 gap-4">
-  <div>
+<div class="grid grid-cols-2 gap-10">
 
-
-<div>
-<span>
-
-![SED](/images/icon.png)
-
-</span>
-<span>
-
-
-[https://sed-nge.inria.fr/](https://sed-nge.inria.fr/)
-
-</span>
-</div>
-
-
-<Transform :scale="0.5" origin="bottom left">
+<Transform :scale="0.2" origin="bottom center">
 
 ![](/images/inr_logo_rouge.png)
 
 </Transform>
 
-  </div>
-  <div origin="top center">
-
-[https://backo-stricto.github.io/diapo](https://backo-stricto.github.io/diapo)
-
-<Transform :scale="0.5">
+<Transform :scale="0.2" origin="bottom center">
   <div style="filter:invert(80%) saturate(1000%)">
 
-![](/images/qr-code.svg)
+![](/images/backo.svg)
 
 </div>
 </Transform>
 
-
-  </div>
 </div>
 
 </footer>
@@ -249,7 +227,7 @@ _... as quick as possible..._
 </div>
 <div v-click=8>
 
-* Authentication and RBAC,
+* Authentication and RBAC / RLAC,
 * views,
 
 </div>
@@ -307,7 +285,7 @@ Less code but not zero code
 <div v-click=1>
 
 
-* authentication and RBAC, <span v-if="$clicks >= 2">✅ </span> 
+* authentication and RBAC / RLAC, <span v-if="$clicks >= 2">✅ </span> 
 * views, <span v-if="$clicks >= 2">✅ </span> 
 * sanity check, <span v-if="$clicks >= 2">✅ </span> 
 * security check, <span v-if="$clicks >= 2">✅ </span> 
@@ -338,13 +316,13 @@ __A backoffice quickly available (in hours or days), entirely functional, adapta
   * full documented
 * _scalable_ 
   * From small to complex application
-  * Avoid unforse feature (__It is code, YOUR code__)
+  * Avoid unfeasible feature (__It is code, YOUR code__)
 
 
 ::right::
 
 <iframe
-  src="https://backo.readthedocs.io/en/latest/readme.html#"
+  src="https://backo.readthedocs.io"
   style="
       width: 200%;
       height: 200%;
@@ -362,13 +340,33 @@ zoom: 0.7
 
 ## Comparative
 
-chatgpt likes backo ;) (oct 2026)
 
-<Transform :scale="0.9">
+Comparison done by chatgpt ;) (oct 2026)
 
-![](/images/comparative_chatgpt.png)
+| Project | License | Type | Data Modeling | Automatic REST API | Resource-Level Permissions | Custom Business Actions | Supported Storage | Maturity | Primary Use Case |
+|---|---|---|---|---|---|---|---|---|---|
+| **Backo** | Open source | Python framework | ✅ | ✅ | ✅ | ✅ | Multi-storage (SQL, NoSQL, files…) | Emerging | Automatic REST API generation from models with storage abstraction |
+| **Flask-AppBuilder** | Open source | Python framework | ✅ | ✅ | ✅ | ✅ | SQLAlchemy (SQL) | High | Back-office and REST API generation from models |
+| **Jetio** | Open source | Python framework | ✅ | ✅ | ◐ | ✅ | SQLAlchemy (SQL) | Medium | Automatic REST API generation from models |
+| **ToolJet** | Open source / Commercial offering | Low-code platform | ◐ | ◐ | ✅ | ✅ | SQL, NoSQL, external APIs | High | Building internal applications connected to data sources |
+| **SQLAlchemy API** | Open source | Python library | ◐ | ✅ | ◐ | ◐ | SQLAlchemy (SQL) | Medium | Automatic CRUD generation for FastAPI |
+| **Django REST Framework** | Open source | Python framework | ✅ | ◐ | ✅ | ✅ | Django ORM (SQL) | Very high | Fully customizable REST APIs |
+| **FastAPI CRUDRouter** | Open source | FastAPI library | ◐ | ✅ | ◐ | ◐ | SQLAlchemy, Tortoise, Ormar… | Medium | Automatic CRUD endpoint generation |
+| **Tigrbl** | Open source | Python framework | ✅ | ✅ | ✅ | ✅ | SQLAlchemy (SQL) | Medium | REST and JSON-RPC API generation from models |
+| **Directus** | Source-available license with restrictions | Low-code backend platform | ❌ | ✅ | ✅ | ✅ | Multiple SQL databases | High | Automatic REST API generation from existing databases |
+| **NocoDB** | Source-available license with restrictions | No-code platform | ❌ | ✅ | ✅ | ✅ | Multiple SQL databases | High | Automatic REST API generation from existing databases |
+| **Appsmith** | Open-source core + Commercial offering | Low-code platform | ❌ | ◐ | ◐ | ✅ | SQL, NoSQL, external APIs | High | Internal application development and API integration |
+| **Supabase** | Open-source components + Commercial services | Backend-as-a-Service | ❌ | ✅ | ✅ | ✅ | PostgreSQL | Very high | Automatic REST APIs and managed backend services |
 
-</Transform>
+
+<style>
+table th,
+table td {
+  padding: 2px 8px;
+  font-size: 16px;
+  line-height: 1.1;
+}
+</style>
 
 
 
@@ -2536,27 +2534,32 @@ layout: section
 # Learn More
 
 
-## Code
+| | |
+| -- | -- |
+| source | [https://github.com/backo-stricto/backo](https://github.com/backo-stricto/backo) |
+| documentation | [https://backo.readthedocs.io/](https://backo.readthedocs.io/) |
+| examples | [https://github.com/backo-stricto/backo/tree/main/examples](https://github.com/backo-stricto/backo/tree/main/examples) |
 
-[backo](https://github.com/backo-stricto/backo)
 
-## Documentation
+```bash
+pip install backo
+```
 
-[backo](https://backo.readthedocs.io/)
-## Examples
+<div class="grid grid-cols-2 gap-1">
 
-[examples](https://github.com/backo-stricto/backo/tree/main/examples)
+<Transform :scale="0.2" origin="bottom center">
 
-<footer>
+![](/images/inr_logo_rouge.png)
 
-<div class="grid grid-cols-4 gap-4" style="filter:invert(30%) saturate(1000%)">
-  <div >
-    <img  src="/images/backo.svg" />
-  </div>
-  <div>
-  </div>
-  <div>
-  </div>
+</Transform>
+
+<Transform :scale="0.2" origin="bottom center">
+  <div style="filter:invert(80%) saturate(1000%)">
+
+![](/images/backo.svg)
+
+</div>
+</Transform>
+
 </div>
 
-</footer>
